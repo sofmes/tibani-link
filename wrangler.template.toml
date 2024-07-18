@@ -1,0 +1,10 @@
+name = "tibani-link"
+compatibility_date = "2024-04-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tibani-link"
+database_id = "<Your ID>"
+preview_database_id = "DB"

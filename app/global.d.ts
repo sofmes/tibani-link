@@ -1,3 +1,4 @@
+import { type DrizzleD1Database } from "drizzle-orm/d1";
 import {} from "hono";
 import "typed-htmx";
 
@@ -7,13 +8,18 @@ type Head = {
 
 declare module "hono" {
     interface Env {
-        Variables: {};
-        Bindings: {};
+        Variables: {
+            db: DrizzleD1Database;
+        };
+        Bindings: {
+            DB: D1Database;
+        };
     }
     interface ContextRenderer {
-        (content: string | Promise<string>, head?: Head):
-            | Response
-            | Promise<Response>;
+        (
+            content: string | Promise<string>,
+            head?: Head
+        ): Response | Promise<Response>;
     }
 }
 
