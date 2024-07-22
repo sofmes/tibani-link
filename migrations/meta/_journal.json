@@ -15,6 +15,20 @@
       "when": 1721288345180,
       "tag": "0001_left_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1721622331284,
+      "tag": "0002_youthful_shooting_star",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1721623796629,
+      "tag": "0003_swift_dormammu",
+      "breakpoints": true
     }
   ]
 }

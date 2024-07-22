@@ -1,10 +1,9 @@
-import { css } from "hono/css";
 import { createRoute } from "honox/factory";
-import { urls } from "../schema";
+import { url } from "../schema";
 
 export default createRoute(async (c) => {
     const name = c.req.query("name") ?? "Hono";
-    const result = await c.var.db.select().from(urls).all();
+    const result = await c.var.db.select().from(url).all();
 
     return c.render(
         <div class="">
