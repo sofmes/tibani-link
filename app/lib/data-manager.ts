@@ -3,8 +3,9 @@ import { eq } from "drizzle-orm";
 import * as schema from "../schema";
 
 export enum AccessLogSetting {
-    AccessCount = 0,
-    AccessUser = 1
+    None = 0,
+    AccessCount = 1 << 0,
+    AccessUser = 1 << 1
 }
 
 class URLDataManager {
@@ -41,6 +42,39 @@ class URLDataManager {
         }
     ): Promise<void> {
         await this.db.update(schema.url).set(data).where(eq(schema.url.id, id));
+    }
+
+    async fetch(
+        authorId: string,
+        page: number
+    ): Promise<{
+        id: string;
+        url: string;
+        hasAccessLimitation: boolean;
+        accessLogSetting: AccessLogSetting;
+    }[]> {
+        const results = await this.db
+            .select({
+                id: schema.url.id,
+                url: schema.url.url,
+                hasAccessLimitation: schema.url.hasAccessLimitation,
+                accessLogSetting: schema.url.accessLogSetting
+            })
+            .from(schema.url)
+            .where(eq(schema.url.authorId, authorId))
+            .limit(10)
+            .offset(10 * (page - 1))
+            .all();
+
+        const parsed = [];
+        for (const result of results) {
+            parsed.push({
+                ...result,
+                accessLogSetting: result.accessLogSetting as number
+            });
+        }
+
+        return parsed;
     }
 }
 

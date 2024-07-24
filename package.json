@@ -1,31 +1,32 @@
 {
-    "name": "tibani-link",
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "test": "jest",
-        "build": "vite build --mode client && vite build",
-        "migrations:generate": "drizzle-kit generate",
-        "migrations:apply:local": "wrangler d1 migrations apply tibani-link --local",
-        "migrations:apply:remote": "wrangler d1 migrations apply tibani-link --remote",
-        "deploy": "vite build && wrangler deploy ./dist/_worker.js"
-    },
-    "private": true,
-    "dependencies": {
-        "hono": "^4.5.0",
-        "honox": "^0.1.23"
-    },
-    "devDependencies": {
-        "@cloudflare/workers-types": "^4.20240712.0",
-        "@hono/vite-cloudflare-pages": "^0.4.2",
-        "@hono/vite-dev-server": "^0.13.1",
-        "autoprefixer": "^10.4.19",
-        "drizzle-kit": "^0.23.0",
-        "drizzle-orm": "^0.32.0",
-        "jest": "^29.7.0",
-        "postcss": "^8.4.39",
-        "tailwindcss": "^3.4.6",
-        "vite": "^5.3.4",
-        "wrangler": "^3.65.0"
-    }
+  "name": "tibani-link",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "test": "vitest",
+    "build": "vite build --mode client && vite build",
+    "migrations:generate": "drizzle-kit generate",
+    "migrations:apply:local": "wrangler d1 migrations apply tibani-link --local",
+    "migrations:apply:remote": "wrangler d1 migrations apply tibani-link --remote",
+    "deploy": "vite build && wrangler deploy ./dist/_worker.js"
+  },
+  "private": true,
+  "dependencies": {
+    "hono": "^4.5.0",
+    "honox": "^0.1.23"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240712.0",
+    "@hono/vite-cloudflare-pages": "^0.4.2",
+    "@hono/vite-dev-server": "^0.13.1",
+    "autoprefixer": "^10.4.19",
+    "drizzle-kit": "^0.23.0",
+    "drizzle-orm": "^0.32.0",
+    "miniflare": "^3.20240718.0",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.6",
+    "vite": "^5.3.4",
+    "vitest": "^2.0.4",
+    "wrangler": "^3.65.0"
+  }
 }
