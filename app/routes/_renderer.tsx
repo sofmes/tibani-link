@@ -4,7 +4,7 @@ import { Link, Script } from "honox/server";
 
 export default jsxRenderer(({ children, title }) => {
     return (
-        <html lang="en">
+        <html lang="ja">
             <head>
                 <meta charset="utf-8" />
                 <meta
