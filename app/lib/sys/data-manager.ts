@@ -1,6 +1,6 @@
 import { DrizzleD1Database } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
-import * as schema from "../schema";
+import * as schema from "../../schema";
 
 export enum AccessLogSetting {
     None = 0,
@@ -47,12 +47,14 @@ class URLDataManager {
     async fetch(
         authorId: string,
         page: number
-    ): Promise<{
-        id: string;
-        url: string;
-        hasAccessLimitation: boolean;
-        accessLogSetting: AccessLogSetting;
-    }[]> {
+    ): Promise<
+        {
+            id: string;
+            url: string;
+            hasAccessLimitation: boolean;
+            accessLogSetting: AccessLogSetting;
+        }[]
+    > {
         const results = await this.db
             .select({
                 id: schema.url.id,

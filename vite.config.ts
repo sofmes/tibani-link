@@ -1,39 +1,24 @@
 import honox from "honox/vite";
-import client from "honox/vite/client";
 import adapter from "@hono/vite-dev-server/cloudflare";
 import pages from "@hono/vite-cloudflare-pages";
 import { defineConfig } from "vite";
 
-const baseConfig = {
+export default defineConfig({
     resolve: {
         alias: {
-            "@": "/app"
+            "@": `${__dirname}/app`
         }
-    }
-};
-
-export default defineConfig(({ mode }) => {
-    if (mode === "client") {
-        return {
-            ...baseConfig,
-            plugins: [client()],
-            build: {
-                rollupOptions: {
-                    input: ["/app/style.css"]
-                }
+    },
+    server: { host: "127.0.0.1", port: 4321 },
+    plugins: [
+        honox({
+            client: {
+                input: ["/app/style.css"]
+            },
+            devServer: {
+                adapter
             }
-        };
-    }
-
-    return {
-        ...baseConfig,
-        plugins: [
-            honox({
-                devServer: {
-                    adapter
-                }
-            }),
-            pages()
-        ]
-    };
+        }),
+        pages()
+    ]
 });

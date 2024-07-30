@@ -16,7 +16,10 @@
       "vitest/globals"
     ],
     "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx"
+    "jsxImportSource": "hono/jsx",
+    "paths": {
+      "@/*": ["./app/*"]
+    }
   },
   "include": [
     "**/*.ts",
