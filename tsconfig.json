@@ -13,7 +13,6 @@
     "types": [
       "vite/client",
       "@cloudflare/workers-types",
-      "vitest/globals"
     ],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",

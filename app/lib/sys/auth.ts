@@ -1,7 +1,7 @@
 import { sign, verify } from "hono/jwt";
 
 function time(): number {
-    return Math.floor(Date.now());
+    return Math.floor(Date.now() / 1000);
 }
 
 export class AuthManager {
@@ -22,8 +22,12 @@ export class AuthManager {
         );
     }
 
-    async verifyMailToken(token: string): Promise<boolean> {
-        return (await verify(token, this.jwtSecret)).exp! > time();
+    async verifyMailToken(token: string): Promise<string | null> {
+        try {
+            return (await verify(token, this.jwtSecret)).email as string;
+        } catch {
+            return null;
+        }
     }
 
     async createToken(email: string): Promise<string> {

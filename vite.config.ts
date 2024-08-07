@@ -9,6 +9,9 @@ export default defineConfig({
             "@": `${__dirname}/app`
         }
     },
+    ssr: {
+        external: ["google-auth-library", "react-dom", "deepmerge", "js-beautify"]
+    },
     server: { host: "127.0.0.1", port: 4321 },
     plugins: [
         honox({
