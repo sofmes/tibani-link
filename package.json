@@ -3,8 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "vitest",
-    "build": "vite build --mode client && vite build",
+    "build": "vite build",
     "migrations:generate": "drizzle-kit generate",
     "migrations:apply:local": "wrangler d1 migrations apply tibani-link --local",
     "migrations:apply:remote": "wrangler d1 migrations apply tibani-link --remote",
@@ -14,7 +13,6 @@
   "dependencies": {
     "google-auth-library": "^9.13.0",
     "hono": "^4.5.4",
-    "honox": "^0.1.23",
     "resend": "^3.5.0"
   },
   "devDependencies": {

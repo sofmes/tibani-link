@@ -1,27 +1,22 @@
-import honox from "honox/vite";
+import build from "@hono/vite-cloudflare-pages";
+import devServer from "@hono/vite-dev-server";
 import adapter from "@hono/vite-dev-server/cloudflare";
-import pages from "@hono/vite-cloudflare-pages";
 import { defineConfig } from "vite";
 
 export default defineConfig({
     resolve: {
         alias: {
-            "@": `${__dirname}/app`
+            "@": `${__dirname}/src`
         }
     },
-    ssr: {
-        external: ["google-auth-library", "react-dom", "deepmerge", "js-beautify"]
+    server: {
+        port: 4321
     },
-    server: { host: "127.0.0.1", port: 4321 },
     plugins: [
-        honox({
-            client: {
-                input: ["/app/style.css"]
-            },
-            devServer: {
-                adapter
-            }
-        }),
-        pages()
+        build(),
+        devServer({
+            adapter,
+            entry: "src/index.tsx"
+        })
     ]
 });

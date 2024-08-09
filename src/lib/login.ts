@@ -42,9 +42,9 @@ export async function loginVerifyByMail(token: string): Promise<string | null> {
 /** Google認証後の処理をする。
  * これはGoogleから送られてきたコードを使ってGoogleユーザーの情報を取得する。
  * そして得られたメールアドレスが千葉工業大学のものかをチェックする。
- * * 返り値がもし`false`だった場合、サポート外のメールアドレス。（つまり、千葉工業大学のじゃない。）
+ * 返り値はトークンで、もしも返り値が`null`であればメールが千葉工業大学のではなかったということ。
  */
-export async function loginByGoogle(code: string): Promise<boolean> {
+export async function loginByGoogle(code: string): Promise<string | null> {
     const response = await googleOAuth2Client.getToken(code);
     if (!response.tokens.access_token)
         throw Error("GoogleからTokenを取得できませんでした。");
@@ -53,8 +53,8 @@ export async function loginByGoogle(code: string): Promise<boolean> {
         response.tokens.access_token
     );
     if (!checkEmail(data.email!)) {
-        return false;
+        return null;
     }
 
-    return true;
+    return await auth.createToken(data.email!);
 }
