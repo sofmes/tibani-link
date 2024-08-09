@@ -1,10 +1,24 @@
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
 
 import { loginByGoogle, loginByMail, loginVerifyByMail } from "@/lib/login";
 import { googleOAuth2URL } from "@/lib/middleware";
 import { setCookie } from "hono/cookie";
 
 const app = new Hono();
+
+function onAuthenticated(c: Context, token: string) {
+    setCookie(c, "session", token);
+
+    const { redirectUri } = c.req.query();
+    if (redirectUri) return c.redirect(redirectUri);
+    else
+        return c.render(
+            <p>
+                ログインしました！<a href="/">ここ</a>
+                からサービスを利用開始できます。
+            </p>
+        );
+}
 
 app.get("/google", async (c) => {
     const { code } = c.req.query();
@@ -22,9 +36,7 @@ app.get("/google", async (c) => {
         );
     }
 
-    setCookie(c, "session", token);
-
-    return c.text("Google認証完了");
+    return onAuthenticated(c, token);
 });
 
 app.post("/mail", async (c) => {
@@ -32,6 +44,7 @@ app.post("/mail", async (c) => {
 
     if (data["email"] && !(data["email"] instanceof File)) {
         if (!(await loginByMail(data["email"], c.req.url))) {
+            c.status(403);
             return c.render(
                 <p>
                     このウェブサービスは千葉工業大学生にのみ提供を行っています。
@@ -51,17 +64,22 @@ app.post("/mail", async (c) => {
 
 app.get("/mail", async (c) => {
     const { verifyToken } = c.req.query();
+    if (!verifyToken) {
+        c.status(400);
+        return c.render(
+            <p>
+                トークンがありません。
+                本当にメールにあったアドレスからアクセスしましたでしょうか？
+            </p>
+        );
+    }
+
     const token = await loginVerifyByMail(verifyToken);
 
     if (token) {
-        setCookie(c, "session", token);
-        return c.render(
-            <p>
-                ログインしました！<a href="/">ここ</a>
-                からサービスを利用開始できます。
-            </p>
-        );
+        return onAuthenticated(c, token);
     } else {
+        c.status(400);
         return c.render(
             <p>
                 セッションが切れています。メール認証のメール確認は５分以内に行ってください。
@@ -73,7 +91,7 @@ app.get("/mail", async (c) => {
 app.get("/", async (c) => {
     return c.render(
         <div>
-            <form action="mail" method="POST">
+            <form action="auth/mail" method="POST">
                 <label for="email">メール：</label>
                 <input type="email" name="email" id="email" required />
                 <button type="submit">メールでログイン</button>

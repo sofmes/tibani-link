@@ -5,6 +5,26 @@ function checkEmail(email: string): boolean {
     return email.endsWith(import.meta.env.VITE_EMAIL_SUFFIX);
 }
 
+/** Google認証後の処理をする。
+ * これはGoogleから送られてきたコードを使ってGoogleユーザーの情報を取得する。
+ * そして得られたメールアドレスが千葉工業大学のものかをチェックする。
+ * 返り値はトークンで、もしも返り値が`null`であればメールが千葉工業大学のではなかったということ。
+ */
+export async function loginByGoogle(code: string): Promise<string | null> {
+    const response = await googleOAuth2Client.getToken(code);
+    if (!response.tokens.access_token)
+        throw Error("GoogleからTokenを取得できませんでした。");
+
+    const data = await googleOAuth2Client.getTokenInfo(
+        response.tokens.access_token
+    );
+    if (!checkEmail(data.email!)) {
+        return null;
+    }
+
+    return await auth.createToken(data.email!);
+}
+
 /** メールを使ってログインを開始する。
  * これを実行するとログインのためだけのメール用トークンが発行され、それを使った
  * 認証用のメールが送られる。
@@ -37,24 +57,4 @@ export async function loginVerifyByMail(token: string): Promise<string | null> {
     }
 
     return null;
-}
-
-/** Google認証後の処理をする。
- * これはGoogleから送られてきたコードを使ってGoogleユーザーの情報を取得する。
- * そして得られたメールアドレスが千葉工業大学のものかをチェックする。
- * 返り値はトークンで、もしも返り値が`null`であればメールが千葉工業大学のではなかったということ。
- */
-export async function loginByGoogle(code: string): Promise<string | null> {
-    const response = await googleOAuth2Client.getToken(code);
-    if (!response.tokens.access_token)
-        throw Error("GoogleからTokenを取得できませんでした。");
-
-    const data = await googleOAuth2Client.getTokenInfo(
-        response.tokens.access_token
-    );
-    if (!checkEmail(data.email!)) {
-        return null;
-    }
-
-    return await auth.createToken(data.email!);
 }

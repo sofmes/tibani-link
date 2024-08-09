@@ -22,12 +22,10 @@ export class AuthManager {
         );
     }
 
-    async verifyMailToken(token: string): Promise<string | null> {
+    async verifyMailToken(token: string): Promise<string | undefined> {
         try {
             return (await verify(token, this.jwtSecret)).email as string;
-        } catch {
-            return null;
-        }
+        } catch {}
     }
 
     async createToken(email: string): Promise<string> {
@@ -41,7 +39,9 @@ export class AuthManager {
         );
     }
 
-    verifyRequest(payload: { exp: number }): boolean {
-        return payload.exp > time();
+    async verifyToken(token: string): Promise<string | undefined> {
+        try {
+            return (await verify(token, this.jwtSecret)).email as string;
+        } catch {}
     }
 }

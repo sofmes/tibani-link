@@ -8,23 +8,29 @@ export enum AccessLogSetting {
     AccessUser = 1 << 1
 }
 
+interface UrlData {
+    url: string;
+    hasAccessLimitation: boolean;
+    accessLogSetting: AccessLogSetting;
+}
+
+interface UrlDataWithAuthor extends UrlData {
+    authorId: string;
+}
+
+interface UrlDataWithId extends UrlData {
+    id: string;
+}
+
 class URLDataManager {
     constructor(private db: DrizzleD1Database) {}
 
-    async create(
-        id: string,
-        url: string,
-        authorId: string,
-        hasAccessLimitation: boolean,
-        accessLogSetting: AccessLogSetting
-    ): Promise<void> {
+    async create(id: string, authorId: string, data: UrlData): Promise<void> {
         await this.db.insert(schema.url).values([
             {
                 id,
-                url,
                 authorId,
-                hasAccessLimitation,
-                accessLogSetting
+                ...data
             }
         ]);
     }
@@ -44,17 +50,23 @@ class URLDataManager {
         await this.db.update(schema.url).set(data).where(eq(schema.url.id, id));
     }
 
-    async fetch(
+    async fetch(id: string): Promise<UrlData | undefined> {
+        return await this.db
+            .select({
+                url: schema.url.url,
+                hasAccessLimitation: schema.url.hasAccessLimitation,
+                accessLogSetting: schema.url.accessLogSetting
+            })
+            .from(schema.url)
+            .where(eq(schema.url.id, id))
+            .limit(1)
+            .get();
+    }
+
+    async fetchMultiple(
         authorId: string,
         page: number
-    ): Promise<
-        {
-            id: string;
-            url: string;
-            hasAccessLimitation: boolean;
-            accessLogSetting: AccessLogSetting;
-        }[]
-    > {
+    ): Promise<UrlDataWithId[]> {
         const results = await this.db
             .select({
                 id: schema.url.id,
