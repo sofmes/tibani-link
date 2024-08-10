@@ -10,16 +10,14 @@ export enum AccessError {
 export async function onAccess(
     ctx: {
         data: DataManager;
-        getToken(): string | undefined;
-        getAuthenticatePath(): string;
+        token?: string;
     },
     id: string
 ): Promise<string | AccessError> {
     const urlData = await ctx.data.url.fetch(id);
     if (!urlData) return AccessError.NotFound;
 
-    const token = ctx.getToken();
-    const email = token ? await auth.verifyToken(token) : undefined;
+    const email = ctx.token ? await auth.verifyToken(ctx.token) : undefined;
 
     // アクセスログの記録。
     if (urlData.accessLogSetting & AccessLogSetting.AccessCount) {

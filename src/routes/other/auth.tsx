@@ -3,14 +3,31 @@ import { Context, Hono } from "hono";
 import { loginByGoogle, loginByMail, loginVerifyByMail } from "@/lib/login";
 import { googleOAuth2URL } from "@/lib/middleware";
 import { setCookie } from "hono/cookie";
+import { setSession, takeRedirectUriAfterAuth } from "@/cookie";
 
 const app = new Hono();
 
 function onAuthenticated(c: Context, token: string) {
-    setCookie(c, "session", token);
+    setSession(c, token);
 
-    const { redirectUri } = c.req.query();
-    if (redirectUri) return c.redirect(redirectUri);
+    const redirectUri = takeRedirectUriAfterAuth(c);
+    if (redirectUri)
+        return c.render(
+            <p>
+                ログインが完了しました。１０秒後に以下のURLへリダイレクトされます。
+                <br />
+                <a href={redirectUri}>{redirectUri}</a>
+            </p>,
+            {
+                title: "Tibani Linkのログインの成功",
+                head: (
+                    <meta
+                        http-equiv="refresh"
+                        content={`10;url=${redirectUri}`}
+                    />
+                )
+            }
+        );
     else
         return c.render(
             <p>
