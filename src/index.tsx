@@ -21,6 +21,10 @@ app.get(
                         content="width=device-width, initial-scale=1.0"
                     />
                     {head}
+
+                    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+                    <script src="https://unpkg.com/htmx-ext-path-params@2.0.2/path-params.js"></script>
+
                     {import.meta.env.PROD ? (
                         <>
                             <link href="/static/style.css" rel="stylesheet" />

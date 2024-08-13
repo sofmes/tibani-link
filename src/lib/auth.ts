@@ -58,3 +58,7 @@ export async function loginVerifyByMail(token: string): Promise<string | null> {
 
     return null;
 }
+
+export async function verifyToken(token: string): Promise<string | undefined> {
+    return await auth.verifyToken(token);
+}

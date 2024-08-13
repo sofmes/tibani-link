@@ -1,6 +1,6 @@
 import { Context, Hono } from "hono";
 
-import { loginByGoogle, loginByMail, loginVerifyByMail } from "@/lib/login";
+import { loginByGoogle, loginByMail, loginVerifyByMail } from "@/lib/auth";
 import { googleOAuth2URL } from "@/lib/middleware";
 import { setCookie } from "hono/cookie";
 import { setSession, takeRedirectUriAfterAuth } from "@/cookie";
