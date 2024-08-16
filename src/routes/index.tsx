@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
@@ -33,6 +33,33 @@ app.get("/", async (c) => {
 const AccessLogSettingEnum = z.nativeEnum(AccessLogSetting);
 type AccessLogSettingEnum = z.infer<typeof AccessLogSettingEnum>;
 
+async function requireLogin(
+    c: Context
+): Promise<string | Response | Promise<Response>> {
+    let token = getSession(c);
+
+    if (!token) {
+        c.status(403);
+        return c.render(<p>ログインしていないので短縮URLを作成できません。</p>);
+    }
+
+    let email = await verifyToken(token);
+    if (!email) {
+        c.status(403);
+        return c.render(
+            <p>セッションが切れています。もう一度ログインしてください。</p>
+        );
+    }
+
+    return email;
+}
+
+const urlData = {
+    url: z.string().max(4096),
+    hasAccessLimitation: z.boolean(),
+    accessLogSetting: z.number().max(Object.keys(AccessLogSetting).length / 2)
+};
+
 app.post(
     "/",
     zValidator(
@@ -42,28 +69,12 @@ app.post(
                 .string()
                 .min(1)
                 .max(4096 - "https://tibani.link/".length),
-            url: z.string().max(4096),
-            hasAccessLimitation: z.boolean(),
-            accessLogSetting: z
-                .number()
-                .max(Object.keys(AccessLogSetting).length / 2)
+            ...urlData
         })
     ),
     async (c) => {
-        let token = getSession(c);
-        if (!token) {
-            c.status(403);
-            return c.render(
-                <p>ログインしていないので短縮URLを作成できません。</p>
-            );
-        }
-        let email = await verifyToken(token);
-        if (!email) {
-            c.status(403);
-            return c.render(
-                <p>セッションが切れています。もう一度ログインしてください。</p>
-            );
-        }
+        const email = await requireLogin(c);
+        if (!(typeof email === "string")) return email;
 
         const data = c.req.valid("form");
         if (!(await c.var.data.url.fetch(data.id))) {
@@ -141,6 +152,31 @@ app.get("/:id", async (c) => {
     }
 
     return c.redirect(result as string);
+});
+
+app.patch("/:id", zValidator("form", z.object(urlData)), async (c) => {
+    let { id } = c.req.param();
+
+    const email = await requireLogin(c);
+    if (!(typeof email === "string")) return email;
+
+    await c.var.data.url.edit(id, c.req.valid("form"));
+
+    return c.render(<p>編集しました。</p>);
+});
+
+app.delete("/:id", async (c) => {
+    let { id } = c.req.param();
+
+    const email = await requireLogin(c);
+    if (!(typeof email === "string")) return email;
+
+    if (await c.var.data.delete(email, id)) {
+        c.status(400);
+        return c.render(<p>あなたの持つそのIDの短縮URLはありませんでした。</p>);
+    } else {
+        return c.render(<p>削除しました。</p>);
+    }
 });
 
 export default app;

@@ -1,5 +1,5 @@
 import { DrizzleD1Database } from "drizzle-orm/d1";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import * as schema from "../../schema";
 
 export enum AccessLogSetting {
@@ -35,8 +35,17 @@ class URLDataManager {
         ]);
     }
 
-    async deleteUrl(id: string): Promise<void> {
-        await this.db.delete(schema.url).where(eq(schema.url.id, id));
+    async deleteUrl(authorId: string, id: string): Promise<boolean> {
+        let results = await this.db
+            .delete(schema.url)
+            .where(
+                and(eq(schema.url.id, id), eq(schema.url.authorId, authorId))
+            )
+            .returning({
+                deletedId: schema.url.id
+            });
+
+        return results.length > 0;
     }
 
     async edit(
@@ -133,10 +142,12 @@ export class DataManager {
         this.url = new URLDataManager(this.db);
     }
 
-    async delete(urlId: string): Promise<void> {
-        await Promise.all([
-            this.url.deleteUrl(urlId),
-            this.accessLog.deleteAccessLog(urlId)
-        ]);
+    async delete(authorId: string, urlId: string): Promise<boolean> {
+        if (await this.url.deleteUrl(authorId, urlId)) {
+            await this.accessLog.deleteAccessLog(urlId);
+            return true;
+        }
+
+        return false;
     }
 }
