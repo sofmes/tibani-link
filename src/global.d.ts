@@ -1,10 +1,12 @@
 import { type DrizzleD1Database } from "drizzle-orm/d1";
 import { type OAuth2Client } from "google-auth-library";
 import {} from "hono";
+import { JSX } from "hono/jsx/jsx-dev-runtime";
 import "typed-htmx";
 
 type Head = {
     title?: string;
+    head?: JSX.Element;
 };
 
 declare module "hono" {

@@ -10,7 +10,8 @@ export default defineConfig({
         }
     },
     server: {
-        port: 4321
+        port: 4321,
+        host: "127.0.0.1"
     },
     plugins: [
         build(),
