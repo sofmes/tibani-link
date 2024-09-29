@@ -16,7 +16,7 @@ export async function loginByGoogle(code: string): Promise<string | null> {
         throw Error("GoogleからTokenを取得できませんでした。");
 
     const data = await googleOAuth2Client.getTokenInfo(
-        response.tokens.access_token
+        response.tokens.access_token,
     );
     if (!checkEmail(data.email!)) {
         return null;
@@ -32,14 +32,14 @@ export async function loginByGoogle(code: string): Promise<string | null> {
  */
 export async function loginByMail(
     email: string,
-    baseUrl: string
+    baseUrl: string,
 ): Promise<boolean> {
     if (!checkEmail(email)) {
         return false;
     }
 
     const params = new URLSearchParams({
-        verifyToken: await auth.createMailToken(email)
+        verifyToken: await auth.createMailToken(email),
     }).toString();
     await sendAuthMail(email, `${baseUrl}?${params}`);
 
@@ -59,6 +59,6 @@ export async function loginVerifyByMail(token: string): Promise<string | null> {
     return null;
 }
 
-export async function verifyToken(token: string): Promise<string | undefined> {
+export async function verifyToken(token: string): Promise<string | null> {
     return await auth.verifyToken(token);
 }

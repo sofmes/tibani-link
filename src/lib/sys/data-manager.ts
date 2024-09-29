@@ -5,20 +5,20 @@ import * as schema from "../../schema";
 export enum AccessLogSetting {
     None = 0,
     AccessCount = 1 << 0,
-    AccessUser = 1 << 1
+    AccessUser = 1 << 1,
 }
 
-interface UrlData {
+export interface UrlData {
     url: string;
     hasAccessLimitation: boolean;
     accessLogSetting: AccessLogSetting;
 }
 
-interface UrlDataWithAuthor extends UrlData {
+export interface UrlDataWithAuthor extends UrlData {
     authorId: string;
 }
 
-interface UrlDataWithId extends UrlData {
+export interface UrlDataWithId extends UrlData {
     id: string;
 }
 
@@ -30,8 +30,8 @@ class URLDataManager {
             {
                 id,
                 authorId,
-                ...data
-            }
+                ...data,
+            },
         ]);
     }
 
@@ -39,10 +39,10 @@ class URLDataManager {
         let results = await this.db
             .delete(schema.url)
             .where(
-                and(eq(schema.url.id, id), eq(schema.url.authorId, authorId))
+                and(eq(schema.url.id, id), eq(schema.url.authorId, authorId)),
             )
             .returning({
-                deletedId: schema.url.id
+                deletedId: schema.url.id,
             });
 
         return results.length > 0;
@@ -54,7 +54,7 @@ class URLDataManager {
             url?: string;
             hasAccessLimitation?: boolean;
             accessLogSetting?: AccessLogSetting;
-        }
+        },
     ): Promise<void> {
         await this.db.update(schema.url).set(data).where(eq(schema.url.id, id));
     }
@@ -64,7 +64,7 @@ class URLDataManager {
             .select({
                 url: schema.url.url,
                 hasAccessLimitation: schema.url.hasAccessLimitation,
-                accessLogSetting: schema.url.accessLogSetting
+                accessLogSetting: schema.url.accessLogSetting,
             })
             .from(schema.url)
             .where(eq(schema.url.id, id))
@@ -74,14 +74,14 @@ class URLDataManager {
 
     async fetchMultiple(
         authorId: string,
-        page: number
+        page: number,
     ): Promise<UrlDataWithId[]> {
         const results = await this.db
             .select({
                 id: schema.url.id,
                 url: schema.url.url,
                 hasAccessLimitation: schema.url.hasAccessLimitation,
-                accessLogSetting: schema.url.accessLogSetting
+                accessLogSetting: schema.url.accessLogSetting,
             })
             .from(schema.url)
             .where(eq(schema.url.authorId, authorId))
@@ -93,7 +93,7 @@ class URLDataManager {
         for (const result of results) {
             parsed.push({
                 ...result,
-                accessLogSetting: result.accessLogSetting as number
+                accessLogSetting: result.accessLogSetting as number,
             });
         }
 
@@ -105,12 +105,12 @@ class AccessLogDataManager {
     constructor(private db: DrizzleD1Database) {}
 
     async fetchPage(
-        page: number
+        page: number,
     ): Promise<{ accessUserId: string | null; accessDate: Date }[]> {
         return await this.db
             .select({
                 accessUserId: schema.accessLog.accessUserId,
-                accessDate: schema.accessLog.accessDate
+                accessDate: schema.accessLog.accessDate,
             })
             .from(schema.accessLog)
             .limit(30)
@@ -122,7 +122,7 @@ class AccessLogDataManager {
         await this.db.insert(schema.accessLog).values({
             urlId,
             accessUserId: userId,
-            accessDate: new Date()
+            accessDate: new Date(),
         });
     }
 

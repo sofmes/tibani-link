@@ -7,7 +7,10 @@ function time(): number {
 export class AuthManager {
     jwtSecret: string;
 
-    constructor(public mailTokenExp: number, public tokenExp: number) {
+    constructor(
+        public mailTokenExp: number,
+        public tokenExp: number,
+    ) {
         this.jwtSecret = import.meta.env.VITE_JWT_SECRET;
     }
 
@@ -16,9 +19,9 @@ export class AuthManager {
             {
                 email,
                 email_verified: false,
-                exp: time() + this.mailTokenExp
+                exp: time() + this.mailTokenExp,
             },
-            this.jwtSecret
+            this.jwtSecret,
         );
     }
 
@@ -33,15 +36,17 @@ export class AuthManager {
             {
                 email,
                 email_verified: true,
-                exp: time() + this.tokenExp
+                exp: time() + this.tokenExp,
             },
-            this.jwtSecret
+            this.jwtSecret,
         );
     }
 
-    async verifyToken(token: string): Promise<string | undefined> {
+    async verifyToken(token: string): Promise<string | null> {
         try {
             return (await verify(token, this.jwtSecret)).email as string;
-        } catch {}
+        } catch {
+            return null;
+        }
     }
 }

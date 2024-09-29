@@ -15,15 +15,17 @@ declare module "hono" {
             db: DrizzleD1Database;
             googleOAuth2Client: OAuth2Client;
             googleOAuth2URL: string;
+            authorId: string | null;
         };
         Bindings: {
             DB: D1Database;
         };
     }
     interface ContextRenderer {
-        (content: string | Promise<string>, head?: Head):
-            | Response
-            | Promise<Response>;
+        (
+            content: string | Promise<string>,
+            head?: Head,
+        ): Response | Promise<Response>;
     }
 }
 

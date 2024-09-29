@@ -9,6 +9,9 @@ dist/
 .vscode/*
 !.vscode/launch.json
 !.vscode/*.code-snippets
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
 .idea/workspace.xml
 .idea/usage.statistics.xml
 .idea/shelf

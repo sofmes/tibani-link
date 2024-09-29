@@ -4,9 +4,6 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "migrations:generate": "drizzle-kit generate",
-    "migrations:apply:local": "wrangler d1 migrations apply tibani-link --local",
-    "migrations:apply:remote": "wrangler d1 migrations apply tibani-link --remote",
     "deploy": "vite build && wrangler deploy ./dist/_worker.js"
   },
   "private": true,
@@ -18,6 +15,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.2",
     "@cloudflare/workers-types": "^4.20240806.0",
     "@hono/vite-cloudflare-pages": "^0.4.2",
     "@hono/vite-dev-server": "^0.13.1",

@@ -2,63 +2,54 @@ import { Context, Hono } from "hono";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
-import { Env } from "@/middleware";
+import { Env, requireLogin } from "@/middleware";
 import { AccessError, onAccess } from "@/lib";
 import { getSession, setRedirectUriAfterAuth } from "@/cookie";
-import { verifyToken } from "@/lib/auth";
-import { AccessLogSetting } from "@/lib/sys/data-manager";
+import { AccessLogSetting, UrlData } from "@/lib/sys/data-manager";
+import Dashboard from "@/views/dashboard";
+
+import routes from "./other";
+import { Error } from "@/views/errors";
 
 const app = new Hono<Env>();
+app.route("/_/", routes);
+
+app.use("/", requireLogin);
 
 app.get("/", async (c) => {
-    if (!getSession(c)) return c.redirect("/_/auth");
+    const authorId = c.get("authorId") as string;
 
-    return c.render(
-        <div hx-ext="path-params">
-            <h1>Tibani Link</h1>
-
-            <form>
-                <label for="url">URL: </label>
-                <input type="url" name="url" />
-                <label for="id">短縮後：</label>
-                tibani.link/
-                <input type="text" name="id" />
-                <button type="submit">作成</button>
-            </form>
-        </div>,
-        { title: "Tibani Link" }
+    const page = c.req.param("page");
+    const data = await c.var.data.url.fetchMultiple(
+        authorId,
+        page ? parseInt(page) : 1,
     );
+
+    return c.render(<Dashboard data={data} />, { title: "Tibani Link" });
 });
 
-const AccessLogSettingEnum = z.nativeEnum(AccessLogSetting);
-type AccessLogSettingEnum = z.infer<typeof AccessLogSettingEnum>;
-
-async function requireLogin(
-    c: Context
-): Promise<string | Response | Promise<Response>> {
-    let token = getSession(c);
-
-    if (!token) {
-        c.status(403);
-        return c.render(<p>ログインしていないので短縮URLを作成できません。</p>);
-    }
-
-    let email = await verifyToken(token);
-    if (!email) {
-        c.status(403);
-        return c.render(
-            <p>セッションが切れています。もう一度ログインしてください。</p>
-        );
-    }
-
-    return email;
-}
-
-const urlData = {
-    url: z.string().max(4096),
-    hasAccessLimitation: z.boolean(),
-    accessLogSetting: z.number().max(Object.keys(AccessLogSetting).length / 2)
+const urlFormData = {
+    url: z.string().url(),
+    hasAccessLimitation: z.string().optional(),
+    accessLogCount: z.string().optional(),
+    accessLogUser: z.string().optional(),
 };
+const urlFormDataObject = z.object(urlFormData);
+type UrlFormData = z.infer<typeof urlFormDataObject>;
+
+function adjustFormData(data: UrlFormData): UrlData {
+    let accessLogSetting = AccessLogSetting.None;
+    if (data.accessLogCount && data.accessLogCount.includes("count"))
+        accessLogSetting |= AccessLogSetting.AccessCount;
+    if (data.accessLogUser && data.accessLogUser.includes("user"))
+        accessLogSetting |= AccessLogSetting.AccessUser;
+
+    return {
+        url: data.url,
+        hasAccessLimitation: data.hasAccessLimitation != null,
+        accessLogSetting,
+    };
+}
 
 app.post(
     "/",
@@ -69,37 +60,32 @@ app.post(
                 .string()
                 .min(1)
                 .max(4096 - "https://tibani.link/".length),
-            ...urlData
-        })
+            ...urlFormData,
+        }),
     ),
     async (c) => {
-        const email = await requireLogin(c);
-        if (!(typeof email === "string")) return email;
+        const authorId = c.get("authorId") as string;
 
         const data = c.req.valid("form");
-        if (!(await c.var.data.url.fetch(data.id))) {
+        if (await c.var.data.url.fetch(data.id)) {
             c.status(400);
-            return c.render(<p>既にその短縮URLは存在します。</p>);
+            return c.render(<Error>既にその短縮URLは存在します。</Error>);
         }
 
-        await c.var.data.url.create(data.id, email, {
-            url: data.url,
-            hasAccessLimitation: data.hasAccessLimitation,
-            accessLogSetting: AccessLogSettingEnum.parse(data.accessLogSetting)
-        });
+        await c.var.data.url.create(data.id, authorId, adjustFormData(data));
 
         c.status(201);
-        return c.render(<p>成功しました！</p>);
-    }
+        return c.render(<Error>短縮URLを作成しました。</Error>);
+    },
 );
 
 app.get("/:id", async (c) => {
     const result = await onAccess(
         {
             data: c.var.data,
-            token: getSession(c)
+            token: getSession(c),
         },
-        c.req.param("id")
+        c.req.param("id"),
     );
 
     const LOGIN_LINK = (
@@ -120,7 +106,7 @@ app.get("/:id", async (c) => {
                 この短縮URLは千葉工業大学生のみがアクセス可能です。
                 <br />
                 {LOGIN_LINK}
-            </p>
+            </p>,
         );
     } else if (result == AccessError.LoginRequiredForAccessLog) {
         requireRedirect = true;
@@ -131,7 +117,7 @@ app.get("/:id", async (c) => {
                 千葉工業大学のメールアドレスによるログインが必要です。
                 <br />
                 {LOGIN_LINK}
-            </p>
+            </p>,
         );
     } else if (result == AccessError.NotFound) {
         c.status(404);
@@ -139,7 +125,7 @@ app.get("/:id", async (c) => {
             <>
                 <h1>404 Not Found</h1>
                 短縮URLのリダイレクト先が見つかりませんでした。
-            </>
+            </>,
         );
     }
 
@@ -154,22 +140,25 @@ app.get("/:id", async (c) => {
     return c.redirect(result as string);
 });
 
-app.patch("/:id", zValidator("form", z.object(urlData)), async (c) => {
+app.patch(
+    "/:id",
+    requireLogin,
+    zValidator("form", urlFormDataObject),
+    async (c) => {
+        let { id } = c.req.param();
+
+        const email = c.get("authorId") as string;
+        const data = c.req.valid("form");
+        await c.var.data.url.edit(id, adjustFormData(data));
+
+        return c.render(<p>編集しました。</p>);
+    },
+);
+
+app.delete("/:id", requireLogin, async (c) => {
     let { id } = c.req.param();
 
-    const email = await requireLogin(c);
-    if (!(typeof email === "string")) return email;
-
-    await c.var.data.url.edit(id, c.req.valid("form"));
-
-    return c.render(<p>編集しました。</p>);
-});
-
-app.delete("/:id", async (c) => {
-    let { id } = c.req.param();
-
-    const email = await requireLogin(c);
-    if (!(typeof email === "string")) return email;
+    const email = c.get("authorId") as string;
 
     if (await c.var.data.delete(email, id)) {
         c.status(400);

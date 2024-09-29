@@ -2,7 +2,6 @@ import { Context, Hono } from "hono";
 
 import { loginByGoogle, loginByMail, loginVerifyByMail } from "@/lib/auth";
 import { googleOAuth2URL } from "@/lib/middleware";
-import { setCookie } from "hono/cookie";
 import { setSession, takeRedirectUriAfterAuth } from "@/cookie";
 
 const app = new Hono();
@@ -25,15 +24,15 @@ function onAuthenticated(c: Context, token: string) {
                         http-equiv="refresh"
                         content={`10;url=${redirectUri}`}
                     />
-                )
-            }
+                ),
+            },
         );
     else
         return c.render(
             <p>
                 ログインしました！<a href="/">ここ</a>
                 からサービスを利用開始できます。
-            </p>
+            </p>,
         );
 }
 
@@ -49,7 +48,7 @@ app.get("/google", async (c) => {
             <p>
                 このウェブサービスは千葉工業大学生にのみ提供を行っています。
                 そのため、Googleでログインする場合、千葉工業大学のアカウントを使ってログインしてください。
-            </p>
+            </p>,
         );
     }
 
@@ -67,14 +66,14 @@ app.post("/mail", async (c) => {
                     このウェブサービスは千葉工業大学生にのみ提供を行っています。
                     そのため、メール認証には千葉工業大学のメールアドレスを使用してください。
                     例：<code>s11K4514YJ@s.chibakoudai.jp</code>
-                </p>
+                </p>,
             );
         }
 
         return c.render(
             <p>
                 ログイン用のメールを送りました。送られてきたメールのURLを開いてください。
-            </p>
+            </p>,
         );
     }
 });
@@ -87,7 +86,7 @@ app.get("/mail", async (c) => {
             <p>
                 トークンがありません。
                 本当にメールにあったアドレスからアクセスしましたでしょうか？
-            </p>
+            </p>,
         );
     }
 
@@ -100,7 +99,7 @@ app.get("/mail", async (c) => {
         return c.render(
             <p>
                 セッションが切れています。メール認証のメール確認は５分以内に行ってください。
-            </p>
+            </p>,
         );
     }
 });
@@ -108,13 +107,13 @@ app.get("/mail", async (c) => {
 app.get("/", async (c) => {
     return c.render(
         <div>
-            <form action="auth/mail" method="POST">
+            <form action="auth/mail" method="post">
                 <label for="email">メール：</label>
                 <input type="email" name="email" id="email" required />
                 <button type="submit">メールでログイン</button>
             </form>
             <a href={googleOAuth2URL}>Googleでログイン</a>
-        </div>
+        </div>,
     );
 });
 
