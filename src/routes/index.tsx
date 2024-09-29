@@ -89,9 +89,9 @@ app.get("/:id", async (c) => {
     );
 
     const LOGIN_LINK = (
-        <>
+        <p>
             <a href="/_/auth">ここ</a>からログインを行ってください。
-        </>
+        </p>
     );
 
     let requireRedirect = false;
@@ -147,7 +147,6 @@ app.patch(
     async (c) => {
         let { id } = c.req.param();
 
-        const email = c.get("authorId") as string;
         const data = c.req.valid("form");
         await c.var.data.url.edit(id, adjustFormData(data));
 
