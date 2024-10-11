@@ -21,6 +21,6 @@ export function setSession(c: Context, token: string | null) {
     else deleteCookie(c, SESSION_COOKIE);
 }
 
-export function getSession(c: Context): string | undefined {
-    return getCookie(c, SESSION_COOKIE);
+export function getSession(c: Context): string | null {
+    return getCookie(c, SESSION_COOKIE) || null;
 }

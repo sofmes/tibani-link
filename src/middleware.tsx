@@ -29,19 +29,3 @@ export const middleware = createMiddleware<Env>(async (c, next) => {
 
     await next();
 });
-
-export const requireLogin = createMiddleware<Env>(async (c, next) => {
-    if (!c.get("authorId")) {
-        c.status(403);
-        return c.render(
-            <>
-                <p>
-                    ログインしていないので短縮URL作成画面にいけません。以下からログインしてください。
-                </p>
-                <a href="/_/auth">ログイン</a>
-            </>,
-        );
-    }
-
-    await next();
-});

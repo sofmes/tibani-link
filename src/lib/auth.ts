@@ -1,4 +1,4 @@
-import { auth, googleOAuth2Client } from "./middleware";
+import { auth, googleOAuth2Client } from "./";
 import { sendAuthMail } from "./sys/mail";
 
 function checkEmail(email: string): boolean {

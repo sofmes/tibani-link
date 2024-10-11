@@ -1,4 +1,4 @@
-import Back from "@/components/back";
+import Back from "@/components/ui/back";
 import { FC } from "hono/jsx";
 
 export const Error: FC = ({ children }) => {

@@ -1,7 +1,13 @@
 import { FC, PropsWithChildren } from "hono/jsx";
 import { JSX } from "hono/jsx/jsx-runtime";
 
-const Header: FC = () => {
+const Logout: FC = () => (
+    <a href="/_/auth/logout" className="text-white sm:text-xl">
+        ログアウト
+    </a>
+);
+
+const Header: FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
     return (
         <header className="bg-black text-white p-4 flex justify-between items-center">
             <div className="flex items-center space-x-6">
@@ -15,10 +21,11 @@ const Header: FC = () => {
                 </div>
             </div>
             <div className="flex items-center space-x-6">
-                <button className="text-white sm:text-xl">ログイン</button>
+                {isLoggedIn ? <Logout /> : <></>}
+                {/* 
                 <button className="text-white text-2xl sm:text-3xl">
                     <i className="far fa-moon"></i>
-                </button>
+                </button>*/}
             </div>
         </header>
     );
@@ -28,16 +35,16 @@ const Main: FC = (props) => {
     return <main className="m-auto flex-grow py-10">{props.children}</main>;
 };
 
-const Body: FC = (props) => {
+const Body: FC<PropsWithChildren<{ isLoggedIn: boolean }>> = (props) => {
     return (
         <body className="h-screen flex flex-col">
-            <Header />
+            <Header isLoggedIn={props.isLoggedIn} />
             <Main>{props.children}</Main>
         </body>
     );
 };
 
-type LayoutProps = { head: JSX.Element; title: string };
+type LayoutProps = { head: JSX.Element; title: string; isLoggedIn: boolean };
 
 const Layout: FC<PropsWithChildren<LayoutProps>> = (props) => {
     return (
@@ -66,7 +73,7 @@ const Layout: FC<PropsWithChildren<LayoutProps>> = (props) => {
                 {props.head}
             </head>
 
-            <Body>{props.children}</Body>
+            <Body isLoggedIn={props.isLoggedIn}>{props.children}</Body>
         </html>
     );
 };

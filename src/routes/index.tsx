@@ -1,21 +1,28 @@
-import { Context, Hono } from "hono";
+import { Hono } from "hono";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
-import { Env, requireLogin } from "@/middleware";
+import { Env } from "@/middleware";
 import { AccessError, onAccess } from "@/lib";
 import { getSession, setRedirectUriAfterAuth } from "@/cookie";
 import { AccessLogSetting, UrlData } from "@/lib/sys/data-manager";
-import Dashboard from "@/views/dashboard";
-
-import routes from "./other";
-import { Error } from "@/views/errors";
+import Dashboard from "@/components/dashboard";
+import { Error } from "@/components/ui/errors";
+import routes from "./auth";
 
 const app = new Hono<Env>();
-app.route("/_/", routes);
+app.route("/_/auth", routes);
 
-app.use("/", requireLogin);
+// ログインしなければ使えないようにするためのミドルウェア
+app.use("/*", async (c, next) => {
+    if (!c.get("authorId")) {
+        return c.redirect("/_/auth");
+    }
 
+    await next();
+});
+
+// ダッシュボード
 app.get("/", async (c) => {
     const authorId = c.get("authorId") as string;
 
@@ -28,6 +35,7 @@ app.get("/", async (c) => {
     return c.render(<Dashboard data={data} />, { title: "Tibani Link" });
 });
 
+// 短縮URL作成
 const urlFormData = {
     url: z.string().url(),
     hasAccessLimitation: z.string().optional(),
@@ -79,6 +87,7 @@ app.post(
     },
 );
 
+// 短縮URLリダイレクト
 app.get("/:id", async (c) => {
     const result = await onAccess(
         {
@@ -140,21 +149,18 @@ app.get("/:id", async (c) => {
     return c.redirect(result as string);
 });
 
-app.patch(
-    "/:id",
-    requireLogin,
-    zValidator("form", urlFormDataObject),
-    async (c) => {
-        let { id } = c.req.param();
+// 短縮URLの編集
+app.patch("/:id", zValidator("form", urlFormDataObject), async (c) => {
+    let { id } = c.req.param();
 
-        const data = c.req.valid("form");
-        await c.var.data.url.edit(id, adjustFormData(data));
+    const data = c.req.valid("form");
+    await c.var.data.url.edit(id, adjustFormData(data));
 
-        return c.render(<p>編集しました。</p>);
-    },
-);
+    return c.render(<p>編集しました。</p>);
+});
 
-app.delete("/:id", requireLogin, async (c) => {
+// 短縮URL削除
+app.delete("/:id", async (c) => {
     let { id } = c.req.param();
 
     const email = c.get("authorId") as string;

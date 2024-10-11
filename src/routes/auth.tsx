@@ -1,41 +1,23 @@
 import { Context, Hono } from "hono";
 
 import { loginByGoogle, loginByMail, loginVerifyByMail } from "@/lib/auth";
-import { googleOAuth2URL } from "@/lib/middleware";
 import { setSession, takeRedirectUriAfterAuth } from "@/cookie";
+import { googleOAuth2URL } from "@/lib";
 
 const app = new Hono();
 
+/**
+ * ログイン後の処理を行う。もしリダイレクト先が設定されているのなら、リダイレクトを行う。
+ */
 function onAuthenticated(c: Context, token: string) {
     setSession(c, token);
 
     const redirectUri = takeRedirectUriAfterAuth(c);
-    if (redirectUri)
-        return c.render(
-            <p>
-                ログインが完了しました。１０秒後に以下のURLへリダイレクトされます。
-                <br />
-                <a href={redirectUri}>{redirectUri}</a>
-            </p>,
-            {
-                title: "Tibani Linkのログインの成功",
-                head: (
-                    <meta
-                        http-equiv="refresh"
-                        content={`10;url=${redirectUri}`}
-                    />
-                ),
-            },
-        );
-    else
-        return c.render(
-            <p>
-                ログインしました！<a href="/">ここ</a>
-                からサービスを利用開始できます。
-            </p>,
-        );
+    if (redirectUri) return c.redirect(redirectUri);
+    else return c.redirect("/");
 }
 
+// Google認証のCallback
 app.get("/google", async (c) => {
     const { code } = c.req.query();
     if (!code) {
@@ -44,17 +26,13 @@ app.get("/google", async (c) => {
 
     const token = await loginByGoogle(code);
     if (!token) {
-        return c.render(
-            <p>
-                このウェブサービスは千葉工業大学生にのみ提供を行っています。
-                そのため、Googleでログインする場合、千葉工業大学のアカウントを使ってログインしてください。
-            </p>,
-        );
+        return c.redirect("/_/auth");
     }
 
     return onAuthenticated(c, token);
 });
 
+// メール認証のログイン用URL送信
 app.post("/mail", async (c) => {
     const data = await c.req.parseBody();
 
@@ -78,6 +56,7 @@ app.post("/mail", async (c) => {
     }
 });
 
+// メール認証後のログインURL先
 app.get("/mail", async (c) => {
     const { verifyToken } = c.req.query();
     if (!verifyToken) {
@@ -104,16 +83,59 @@ app.get("/mail", async (c) => {
     }
 });
 
+// ログアウト
+app.get("/logout", (c) => {
+    setSession(c, null);
+    return c.redirect("/_/auth");
+});
+
+// 認証フォーム
 app.get("/", async (c) => {
     return c.render(
-        <div>
-            <form action="auth/mail" method="post">
-                <label for="email">メール：</label>
-                <input type="email" name="email" id="email" required />
-                <button type="submit">メールでログイン</button>
+        <>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+                アクセスには認証が必要です
+            </h2>
+
+            {/* メール認証 */}
+            <form className="space-y-4 mb-6">
+                <div>
+                    <label htmlFor="username" className="block mb-1">
+                        大学メールアドレス
+                    </label>
+                    <input
+                        type="email"
+                        id="username"
+                        placeholder="大学メールアドレスを入力"
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                        required
+                    />
+                </div>
+                <button
+                    type="submit"
+                    className="bg-blue-500 text-white w-full py-3 rounded-lg"
+                >
+                    認証メールを送信
+                </button>
             </form>
-            <a href={googleOAuth2URL}>Googleでログイン</a>
-        </div>,
+
+            {/* Google認証 */}
+            <div className="text-center">
+                <p className="text-gray-600 mb-4">または</p>
+                <a
+                    href={googleOAuth2URL}
+                    className="
+                        bg-gray-200 text-gray-700 rounded-lg
+                        w-full py-3
+                        flex items-center justify-center space-x-2
+                        hover:bg-gray-300 transition duration-200
+                    "
+                >
+                    <i className="fab fa-google text-lg"></i>
+                    <span>Googleでログイン</span>
+                </a>
+            </div>
+        </>,
     );
 });
 

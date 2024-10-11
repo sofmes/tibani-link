@@ -1,7 +1,7 @@
 import { FC } from "hono/jsx";
 
-import Button from "@/components/button";
-import Options from "@/components/options";
+import Button from "@/components/ui/button";
+import Options from "@/components/ui/options";
 import { UrlDataWithId } from "@/lib/sys/data-manager";
 
 const Form: FC = () => {
@@ -21,8 +21,9 @@ const Form: FC = () => {
                 />
                 <input
                     type="text"
+                    pattern="^[0-9A-Za-z]+$"
                     name="id"
-                    placeholder="短縮後（オプション）"
+                    placeholder="短縮後（半角英数字）"
                     className="p-3 border border-gray-300"
                 />
 
