@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren, useState } from "hono/jsx";
+import { FC, PropsWithChildren } from "hono/jsx";
 
 import { buttonClassName } from "@/components/ui";
 import { AccessLogSetting, UrlDataWithId } from "@/lib/data-manager";

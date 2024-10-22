@@ -1,32 +1,32 @@
 {
-  "name": "tibani-link",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "deploy": "vite build && wrangler deploy ./dist/_worker.js"
-  },
-  "private": true,
-  "dependencies": {
-    "@hono/zod-validator": "^0.2.2",
-    "google-auth-library": "^9.13.0",
-    "hono": "^4.5.4",
-    "resend": "^3.5.0",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.2",
-    "@cloudflare/workers-types": "^4.20240806.0",
-    "@hono/vite-cloudflare-pages": "^0.4.2",
-    "@hono/vite-dev-server": "^0.13.1",
-    "@types/bun": "^1.1.6",
-    "autoprefixer": "^10.4.20",
-    "drizzle-kit": "^0.23.2",
-    "drizzle-orm": "^0.32.2",
-    "miniflare": "^3.20240725.0",
-    "postcss": "^8.4.41",
-    "tailwindcss": "^3.4.7",
-    "vite": "^5.3.5",
-    "wrangler": "^3.69.1"
-  }
+    "name": "tibani-link",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "deploy": "vite build && wrangler pages deploy"
+    },
+    "private": true,
+    "dependencies": {
+        "@hono/zod-validator": "^0.2.2",
+        "google-auth-library": "^9.13.0",
+        "hono": "^4.5.4",
+        "resend": "^3.5.0",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^1.9.2",
+        "@cloudflare/workers-types": "^4.20240806.0",
+        "@hono/vite-cloudflare-pages": "^0.4.2",
+        "@hono/vite-dev-server": "^0.13.1",
+        "@types/bun": "^1.1.6",
+        "autoprefixer": "^10.4.20",
+        "drizzle-kit": "^0.23.2",
+        "drizzle-orm": "^0.32.2",
+        "miniflare": "^3.20240725.0",
+        "postcss": "^8.4.41",
+        "tailwindcss": "^3.4.7",
+        "vite": "^5.3.5",
+        "wrangler": "^3.69.1"
+    }
 }
