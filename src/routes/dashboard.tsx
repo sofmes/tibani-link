@@ -14,7 +14,7 @@ const app = new Hono<Env>();
 // ログインしなければ使えないようにするためのミドルウェア
 app.use("/", async (c: Context, next) => {
     if (!c.get("authorId")) {
-        return c.redirect("/_/auth");
+        return c.redirect("/_auth");
     }
 
     await next();

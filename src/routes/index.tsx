@@ -11,7 +11,7 @@ import Login from "@/components/views/login";
 
 const app = new Hono<Env>();
 
-app.route("/_/auth", routes);
+app.route("/_auth", routes);
 app.route("/", dashboard);
 
 // 短縮URLリダイレクト

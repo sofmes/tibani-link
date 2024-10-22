@@ -28,7 +28,7 @@ app.get("/google", async (c) => {
 
     const token = await loginByGoogle(code);
     if (!token) {
-        return c.redirect("/_/auth");
+        return c.redirect("/_auth");
     }
 
     return onAuthenticated(c, token);
@@ -37,7 +37,7 @@ app.get("/google", async (c) => {
 // ログアウト
 app.get("/logout", (c) => {
     setSession(c, null);
-    return c.redirect("/_/auth");
+    return c.redirect("/_auth");
 });
 
 // 認証フォーム

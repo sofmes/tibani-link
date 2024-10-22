@@ -2,7 +2,7 @@ import { FC, PropsWithChildren } from "hono/jsx";
 import { JSX } from "hono/jsx/jsx-runtime";
 
 const Logout: FC = () => (
-    <a href="/_/auth/logout" className="text-white sm:text-xl">
+    <a href="/_auth/logout" className="text-white sm:text-xl">
         ログアウト
     </a>
 );
