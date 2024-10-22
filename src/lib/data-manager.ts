@@ -1,6 +1,6 @@
 import { DrizzleD1Database } from "drizzle-orm/d1";
-import { and, eq } from "drizzle-orm";
-import * as schema from "../../schema";
+import { and, count, eq } from "drizzle-orm";
+import * as schema from "../schema";
 
 export enum AccessLogSetting {
     None = 0,
@@ -101,21 +101,54 @@ class URLDataManager {
     }
 }
 
+export interface AccessRecord {
+    accessUserId: string | null;
+    accessDate: Date;
+}
+
 class AccessLogDataManager {
     constructor(private db: DrizzleD1Database) {}
 
     async fetchPage(
+        urlId: string,
         page: number,
-    ): Promise<{ accessUserId: string | null; accessDate: Date }[]> {
+        limit: number,
+    ): Promise<AccessRecord[]> {
         return await this.db
             .select({
                 accessUserId: schema.accessLog.accessUserId,
                 accessDate: schema.accessLog.accessDate,
             })
             .from(schema.accessLog)
-            .limit(30)
-            .offset(30 * (page - 1))
+            .where(eq(schema.accessLog.urlId, urlId))
+            .limit(limit)
+            .offset(limit * (page - 1))
             .all();
+    }
+
+    async countPage(
+        urlId: string,
+        page: number,
+        limit: number,
+    ): Promise<number> {
+        let result = await this.db
+            .select({ count: count() })
+            .from(schema.accessLog)
+            .where(eq(schema.accessLog.urlId, urlId))
+            .limit(limit)
+            .offset(limit * (page - 1))
+            .get();
+        return result ? result.count : 0;
+    }
+
+    async fetchAccessCount(urlId: string): Promise<number> {
+        return (await this.db
+            .select({
+                count: count(),
+            })
+            .from(schema.accessLog)
+            .where(eq(schema.accessLog.urlId, urlId))
+            .get())!.count;
     }
 
     async add(urlId: string, userId?: string): Promise<void> {

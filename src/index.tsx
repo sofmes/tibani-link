@@ -1,29 +1,42 @@
 import { Hono } from "hono";
 import { jsxRenderer } from "hono/jsx-renderer";
+import { drizzle, DrizzleD1Database } from "drizzle-orm/d1";
 
 import routes from "./routes";
-import { Env, middleware } from "./middleware";
-import Layout from "./components/layout";
+import Layout from "./components/views/layout";
 import { getSession } from "./cookie";
+import { DataManager } from "./lib/data-manager";
+import { verifyToken } from "./lib/login";
+
+export type Env = {
+    Variables: {
+        db: DrizzleD1Database;
+        data: DataManager;
+        authorId: string | null;
+        isLoggedIn: boolean;
+    };
+    Bindings: {
+        DB: D1Database;
+    };
+};
 
 const app = new Hono<Env>();
 
-app.use(middleware);
+app.use(async (c, next) => {
+    c.set("db", drizzle(c.env.DB));
+    c.set("data", new DataManager(c.var.db));
 
-app.all(
-    "*",
-    jsxRenderer(({ children, title, head }, c) => {
-        return (
-            <Layout
-                isLoggedIn={getSession(c) != null}
-                title={title || "Tibani Link"}
-                head={head || <></>}
-            >
-                {children}
-            </Layout>
-        );
-    }),
-);
+    let token = getSession(c);
+    if (token) {
+        c.set("authorId", await verifyToken(token));
+        c.set("isLoggedIn", true);
+    } else {
+        c.set("authorId", null);
+        c.set("isLoggedIn", false);
+    }
+
+    await next();
+});
 
 app.route("/", routes);
 

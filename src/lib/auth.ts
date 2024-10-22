@@ -1,64 +1,54 @@
-import { auth, googleOAuth2Client } from "./";
-import { sendAuthMail } from "./sys/mail";
+import { sign, verify } from "hono/jwt";
 
-function checkEmail(email: string): boolean {
-    return email.endsWith(import.meta.env.VITE_EMAIL_SUFFIX);
+function time(): number {
+    return Math.floor(Date.now() / 1000);
 }
 
-/** Google認証後の処理をする。
- * これはGoogleから送られてきたコードを使ってGoogleユーザーの情報を取得する。
- * そして得られたメールアドレスが千葉工業大学のものかをチェックする。
- * 返り値はトークンで、もしも返り値が`null`であればメールが千葉工業大学のではなかったということ。
- */
-export async function loginByGoogle(code: string): Promise<string | null> {
-    const response = await googleOAuth2Client.getToken(code);
-    if (!response.tokens.access_token)
-        throw Error("GoogleからTokenを取得できませんでした。");
+export class AuthManager {
+    jwtSecret: string;
 
-    const data = await googleOAuth2Client.getTokenInfo(
-        response.tokens.access_token,
-    );
-    if (!checkEmail(data.email!)) {
-        return null;
+    constructor(
+        public mailTokenExp: number,
+        public tokenExp: number,
+    ) {
+        this.jwtSecret = import.meta.env.VITE_JWT_SECRET;
     }
 
-    return await auth.createToken(data.email!);
-}
-
-/** メールを使ってログインを開始する。
- * これを実行するとログインのためだけのメール用トークンが発行され、それを使った
- * 認証用のメールが送られる。
- * 返り値がもし`false`だった場合、サポート外のメールアドレス。（つまり、千葉工業大学のじゃない。）
- */
-export async function loginByMail(
-    email: string,
-    baseUrl: string,
-): Promise<boolean> {
-    if (!checkEmail(email)) {
-        return false;
+    async createMailToken(email: string): Promise<string> {
+        return await sign(
+            {
+                email,
+                email_verified: false,
+                exp: time() + this.mailTokenExp,
+            },
+            this.jwtSecret,
+        );
     }
 
-    const params = new URLSearchParams({
-        verifyToken: await auth.createMailToken(email),
-    }).toString();
-    await sendAuthMail(email, `${baseUrl}?${params}`);
-
-    return true;
-}
-
-/** メールログイン時のメールにあった認証リンクを開いた後の処理。
- * メールに同梱していたURLのトークンを受け取り、そこから
- * 二週間使えるログイントークンを生成する。`null`の場合トークンが不適切。
- */
-export async function loginVerifyByMail(token: string): Promise<string | null> {
-    if (token) {
-        const email = await auth.verifyMailToken(token);
-        if (email) return await auth.createToken(email);
+    async verifyMailToken(token: string): Promise<string | undefined> {
+        try {
+            return (await verify(token, this.jwtSecret)).email as string;
+        } catch {}
     }
 
-    return null;
+    async createToken(email: string): Promise<string> {
+        return await sign(
+            {
+                email,
+                email_verified: true,
+                exp: time() + this.tokenExp,
+            },
+            this.jwtSecret,
+        );
+    }
+
+    async verifyToken(token: string): Promise<string | null> {
+        try {
+            return (await verify(token, this.jwtSecret)).email as string;
+        } catch {
+            return null;
+        }
+    }
 }
 
-export async function verifyToken(token: string): Promise<string | null> {
-    return await auth.verifyToken(token);
-}
+export const auth = new AuthManager(300, 1209600);

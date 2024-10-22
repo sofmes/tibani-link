@@ -10,7 +10,7 @@
         "url_id": {
           "name": "url_id",
           "type": "text",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },

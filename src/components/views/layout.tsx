@@ -44,7 +44,7 @@ const Body: FC<PropsWithChildren<{ isLoggedIn: boolean }>> = (props) => {
     );
 };
 
-type LayoutProps = { head: JSX.Element; title: string; isLoggedIn: boolean };
+type LayoutProps = { head?: JSX.Element; title: string; isLoggedIn: boolean };
 
 const Layout: FC<PropsWithChildren<LayoutProps>> = (props) => {
     return (
@@ -68,7 +68,7 @@ const Layout: FC<PropsWithChildren<LayoutProps>> = (props) => {
                     rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
                 />
-                <title>{props.title}</title>
+                <title>tibani.link - {props.title}</title>
 
                 {props.head}
             </head>

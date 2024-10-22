@@ -11,7 +11,7 @@ export const url = sqliteTable("url", {
 });
 
 export const accessLog = sqliteTable("access_log", {
-    urlId: text("url_id").notNull().primaryKey(),
+    urlId: text("url_id").notNull(),
     accessUserId: text("access_user_id"),
     accessDate: integer("access_date", { mode: "timestamp" }).notNull()
 });

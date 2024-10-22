@@ -1,18 +1,7 @@
-import { AccessLogSetting, DataManager } from "./sys/data-manager";
+import { AccessLogSetting, DataManager } from "./data-manager";
 
-import { OAuth2Client } from "google-auth-library";
-import { AuthManager } from "./sys/auth";
-
-export const auth = new AuthManager(300, 1209600);
-export const googleOAuth2Client = new OAuth2Client(
-    import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
-    import.meta.env.VITE_GOOGLE_REDIRECT_URI,
-);
-export const googleOAuth2URL = googleOAuth2Client.generateAuthUrl({
-    access_type: "offline",
-    scope: "https://www.googleapis.com/auth/userinfo.email",
-});
+import { auth } from "./auth";
+import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 export enum AccessError {
     LoginRequiredForAccessLog,
@@ -23,23 +12,29 @@ export enum AccessError {
 export async function onAccess(
     ctx: {
         data: DataManager;
-        token: string | null;
+        userId: string | null;
     },
     id: string,
 ): Promise<string | AccessError> {
     const urlData = await ctx.data.url.fetch(id);
     if (!urlData) return AccessError.NotFound;
 
-    const email = ctx.token ? await auth.verifyToken(ctx.token) : undefined;
+    const userId = ctx.userId || undefined;
 
     // アクセスログの記録。
+    console.log(
+        urlData.accessLogSetting,
+        urlData.accessLogSetting & AccessLogSetting.AccessCount,
+        userId,
+    );
     if (urlData.accessLogSetting & AccessLogSetting.AccessCount) {
-        if (!email) return AccessError.LoginRequiredForAccessLog;
-        ctx.data.accessLog.add(id, email);
+        if (!userId && urlData.accessLogSetting & AccessLogSetting.AccessUser)
+            return AccessError.LoginRequiredForAccessLog;
+        await ctx.data.accessLog.add(id, userId);
     }
 
     // アクセス制限。
-    if (urlData.hasAccessLimitation && !email) {
+    if (urlData.hasAccessLimitation && !userId) {
         return AccessError.AccessIsLimited;
     }
 
