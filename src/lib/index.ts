@@ -1,8 +1,5 @@
 import { AccessLogSetting, DataManager } from "./data-manager";
 
-import { auth } from "./auth";
-import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
-
 export enum AccessError {
     LoginRequiredForAccessLog,
     AccessIsLimited,
