@@ -1,9 +1,7 @@
 import { Hono } from "hono";
-import { jsxRenderer } from "hono/jsx-renderer";
 import { drizzle, DrizzleD1Database } from "drizzle-orm/d1";
 
 import routes from "./routes";
-import Layout from "./components/views/layout";
 import { getSession } from "./cookie";
 import { DataManager } from "./lib/data-manager";
 import { verifyToken } from "./lib/login";

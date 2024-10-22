@@ -1,30 +1,43 @@
-import { AccessRecord } from "@/lib/data-manager";
+import { AccessLogSetting, AccessRecord } from "@/lib/data-manager";
 import { buttonClassName } from "../ui";
 
 const AccessLogTable = ({
     data,
+    id,
+    previousPage,
+    nextPage,
 }: {
     data: AccessRecord[];
+    id: string;
+    previousPage?: number;
+    nextPage?: number;
 }) => {
     return (
-        <table class="w-full my-5">
-            <tr>
-                <th scope="col" class="text-center">
-                    アクセス日時
-                </th>
-                <th scope="col" class="text-center">
-                    アクセスユーザー
-                </th>
-            </tr>
-            {data.map((record) => (
+        <>
+            <table class="w-full my-5">
                 <tr>
-                    <td class="text-center">
-                        {record.accessDate.toLocaleString()}
-                    </td>
-                    <td class="text-center">{record.accessUserId}</td>
+                    <th scope="col" class="text-center">
+                        アクセス日時
+                    </th>
+                    <th scope="col" class="text-center">
+                        アクセスユーザー
+                    </th>
                 </tr>
-            ))}
-        </table>
+                {data.map((record) => (
+                    <tr>
+                        <td class="text-center">
+                            {record.accessDate.toLocaleString()}
+                        </td>
+                        <td class="text-center">{record.accessUserId}</td>
+                    </tr>
+                ))}
+            </table>
+            <Pagination
+                id={id}
+                previousPage={previousPage}
+                nextPage={nextPage}
+            />
+        </>
     );
 };
 
@@ -74,27 +87,37 @@ const Pagination = ({
 const AccessLog = ({
     id,
     accessCount,
+    accessLogSetting,
     data,
     previousPage,
     nextPage,
 }: {
     id: string;
+    accessLogSetting: AccessLogSetting;
     accessCount: number;
     data: AccessRecord[];
     previousPage?: number;
     nextPage?: number;
 }) => {
+    const hasAccessCount = accessLogSetting & AccessLogSetting.AccessCount;
+    const hasAccessUser = accessLogSetting & AccessLogSetting.AccessUser;
+
     return (
         <div id={`access-log-${id}`}>
             <hr class="my-3" />
             <h1 class="text-3xl">アクセスログ</h1>
-            アクセス数：{accessCount}
-            <AccessLogTable data={data} />
-            <Pagination
-                id={id}
-                previousPage={previousPage}
-                nextPage={nextPage}
-            />
+            {hasAccessCount ? `アクセス数：${accessCount}` : ""}
+
+            {hasAccessUser ? (
+                <AccessLogTable
+                    data={data}
+                    id={id}
+                    previousPage={previousPage}
+                    nextPage={nextPage}
+                />
+            ) : (
+                <></>
+            )}
         </div>
     );
 };

@@ -1,5 +1,4 @@
 import { googleOAuth2URL } from "@/lib/login";
-import { FC } from "hono/jsx";
 
 const Login = ({ title }: { title?: string }) => {
     return (

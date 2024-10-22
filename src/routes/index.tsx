@@ -2,7 +2,7 @@ import { Hono } from "hono";
 
 import { type Env } from "@/index";
 import { AccessError, onAccess } from "@/lib";
-import { getSession, setRedirectUriAfterAuth } from "@/cookie";
+import { setRedirectUriAfterAuth } from "@/cookie";
 
 import dashboard from "./dashboard";
 import routes from "./auth";

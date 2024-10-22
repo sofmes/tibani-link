@@ -7,6 +7,7 @@ import Dashboard from "@/components/views/dashboard";
 import { AccessLogSetting, UrlData } from "@/lib/data-manager";
 import { type Env } from "@/index";
 import Layout from "@/components/views/layout";
+import { buttonClassName } from "@/components/ui";
 
 const app = new Hono<Env>();
 
@@ -73,18 +74,48 @@ app.post(
         }),
     ),
     async (c) => {
-        const authorId = c.get("authorId") as string;
-
         const data = c.req.valid("form");
         if (await c.var.data.url.fetch(data.id)) {
             c.status(400);
-            return c.render("既にその短縮URLは存在します。");
+            return c.render(
+                <Layout title="短縮URL作成失敗" isLoggedIn={c.var.isLoggedIn}>
+                    <h1 class="bold text-3xl">既にその短縮URLは存在します。</h1>
+                </Layout>,
+            );
         }
 
-        await c.var.data.url.create(data.id, authorId, adjustFormData(data));
+        await c.var.data.url.create(
+            data.id,
+            c.var.authorId as string,
+            adjustFormData(data),
+        );
+
+        const shortenedUrl = `https://tibani.link/${data.id}`;
 
         c.status(201);
-        return c.render("短縮URLを作成しました。");
+        return c.render(
+            <Layout title="短縮URL作成完了" isLoggedIn={c.var.isLoggedIn}>
+                <h1 class="bold text-3xl">その短縮URLを作成しました！</h1>
+                <p>
+                    短縮結果：
+                    <a href={shortenedUrl} class="text-blue-600">
+                        {shortenedUrl}
+                    </a>
+                </p>
+                <p>
+                    <a
+                        href="/"
+                        class={`
+                            ${buttonClassName}
+                            block bg-gray-300 text-black
+                            w-fit my-3 mx-auto
+                        `}
+                    >
+                        戻る
+                    </a>
+                </p>
+            </Layout>,
+        );
     },
 );
 
@@ -127,9 +158,12 @@ app.get("/:id/log", async (c) => {
     );
     const count = await c.var.data.accessLog.fetchAccessCount(id);
 
+    const setting = await c.var.data.url.fetch(id);
+
     return c.render(
         <AccessLog
             id={id}
+            accessLogSetting={setting!.accessLogSetting}
             accessCount={count}
             data={data}
             previousPage={page == 1 ? undefined : page - 1}

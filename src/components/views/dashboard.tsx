@@ -1,7 +1,7 @@
 import { FC, PropsWithChildren, useState } from "hono/jsx";
 
 import { buttonClassName } from "@/components/ui";
-import { UrlDataWithId } from "@/lib/data-manager";
+import { AccessLogSetting, UrlDataWithId } from "@/lib/data-manager";
 
 // 短縮URLのオプション
 const CheckBox: FC<PropsWithChildren<{ name: string; id: string }>> = ({
@@ -94,17 +94,25 @@ const Form = () => {
     );
 };
 
-const LinkItemButtons = ({ id }: { id: string }) => {
+const LinkItemButtons = ({
+    id,
+    accessLogSetting,
+}: { id: string; accessLogSetting: AccessLogSetting }) => {
+    const hasNotLog = accessLogSetting == AccessLogSetting.None;
+    const justify = hasNotLog ? "justify-evenly" : "justify-evenly";
+
     return (
-        <>
+        <div class={`flex ${justify} space-x-2`}>
             <button
                 type="button"
                 class={`${buttonClassName} bg-green-500`}
                 hx-get={`/${id}/log`}
-                hx-target="#log"
+                hx-target={`#access-log-container-${id}`}
+                hidden={hasNotLog}
             >
                 ログ
             </button>
+
             <button
                 hx-delete={`/${id}`}
                 hx-target={`#link-${id}`}
@@ -114,11 +122,15 @@ const LinkItemButtons = ({ id }: { id: string }) => {
             >
                 削除
             </button>
-        </>
+        </div>
     );
 };
 
-const LinkItem = ({ url, id }: { url: string; id: string }) => {
+const LinkItem = ({
+    url,
+    id,
+    accessLogSetting,
+}: { url: string; id: string; accessLogSetting: AccessLogSetting }) => {
     const shortenedUrl = `https://tibani.link/${id}`;
 
     return (
@@ -135,12 +147,15 @@ const LinkItem = ({ url, id }: { url: string; id: string }) => {
                     {id}
                 </a>
 
-                <div className="flex justify-evenly w-2/5 space-x-2">
-                    <LinkItemButtons id={id} />
+                <div className="w-2/5">
+                    <LinkItemButtons
+                        id={id}
+                        accessLogSetting={accessLogSetting}
+                    />
                 </div>
             </div>
 
-            <div id="log"></div>
+            <div id={`access-log-container-${id}`}></div>
         </li>
     );
 };
@@ -149,7 +164,11 @@ const LinkList = async ({ data }: { data: UrlDataWithId[] }) => {
     return (
         <ul className="space-y-4">
             {data.map((d) => (
-                <LinkItem url={d.url} id={d.id} />
+                <LinkItem
+                    url={d.url}
+                    id={d.id}
+                    accessLogSetting={d.accessLogSetting}
+                />
             ))}
         </ul>
     );
