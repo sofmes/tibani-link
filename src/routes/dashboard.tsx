@@ -11,7 +11,7 @@ import Layout from "@/components/views/layout";
 const app = new Hono<Env>();
 
 // ログインしなければ使えないようにするためのミドルウェア
-app.use("/*", async (c: Context, next) => {
+app.use("/", async (c: Context, next) => {
     if (!c.get("authorId")) {
         return c.redirect("/_/auth");
     }

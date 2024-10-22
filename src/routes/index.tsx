@@ -6,6 +6,8 @@ import { getSession, setRedirectUriAfterAuth } from "@/cookie";
 
 import dashboard from "./dashboard";
 import routes from "./auth";
+import Layout from "@/components/views/layout";
+import Login from "@/components/views/login";
 
 const app = new Hono<Env>();
 
@@ -24,12 +26,6 @@ app.get("/:id", async (c) => {
         id,
     );
 
-    const LOGIN_LINK = (
-        <p>
-            <a href="/_/auth">ここ</a>からログインを行ってください。
-        </p>
-    );
-
     let requireRedirect = false;
     let response = null;
 
@@ -38,33 +34,38 @@ app.get("/:id", async (c) => {
 
         c.status(403);
         response = c.render(
-            <p>
-                この短縮URLは千葉工業大学生のみがアクセス可能です。
-                <br />
-                {LOGIN_LINK}
-            </p>,
+            <Layout
+                title="千葉工業大学生の認証が必要"
+                isLoggedIn={c.var.isLoggedIn}
+            >
+                <Login title="この先、千葉工業大学生限定のため、認証が必要です。" />
+            </Layout>,
         );
     } else if (result == AccessError.LoginRequiredForAccessLog) {
         requireRedirect = true;
 
         response = c.render(
-            <p>
-                この短縮URLはアクセスログを記録するために
-                千葉工業大学のメールアドレスによるログインが必要です。
-                <br />
-                {LOGIN_LINK}
-            </p>,
+            <Layout
+                title="千葉工業大学の認証が必要"
+                isLoggedIn={c.var.isLoggedIn}
+            >
+                <Login title="アクセスログ記録のために、認証をしてください。" />
+            </Layout>,
         );
     } else if (result == AccessError.NotFound) {
         c.status(404);
         response = c.render(
-            <>
-                <h1>404 Not Found</h1>
-                短縮URLのリダイレクト先が見つかりませんでした。
-            </>,
+            <Layout
+                title="短縮URLが見つかりませんでした。"
+                isLoggedIn={c.var.isLoggedIn}
+            >
+                <h1 class="text-5xl">404 Not Found</h1>
+                <p>短縮URLのリダイレクト先が見つかりませんでした。</p>
+            </Layout>,
         );
     }
 
+    console.log(requireRedirect, response);
     if (response) {
         if (requireRedirect) {
             setRedirectUriAfterAuth(c, c.req.url);

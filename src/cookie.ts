@@ -10,7 +10,7 @@ export function setRedirectUriAfterAuth(c: Context, uri: string | null) {
 
 export function takeRedirectUriAfterAuth(c: Context): string | undefined {
     const url = getCookie(c, REDIRECT_COOKIE);
-    if (url) setRedirectUriAfterAuth(c, url);
+    if (url) setRedirectUriAfterAuth(c, null);
     return url;
 }
 
