@@ -14,11 +14,6 @@ export default defineConfig((mode) => {
             port: 4321,
             host: "127.0.0.1",
         },
-        build: {
-            rollupOptions: {
-                input: ["src/style.css"],
-            },
-        },
         plugins: [
             build(),
             devServer({
