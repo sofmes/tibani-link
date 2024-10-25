@@ -1,3 +1,4 @@
+import { HOST } from "@/lib";
 import { FC, PropsWithChildren } from "hono/jsx";
 import { JSX } from "hono/jsx/jsx-runtime";
 
@@ -16,9 +17,7 @@ const Header: FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
                     alt="Tibani"
                     className="w-10 h-10 sm:w-16 sm:h-16 object-contain"
                 />
-                <div className="text-3xl sm:text-5xl font-bold">
-                    tibani.link
-                </div>
+                <div className="text-3xl sm:text-5xl font-bold">{HOST}</div>
             </div>
             <div className="flex items-center space-x-6">
                 {isLoggedIn ? <Logout /> : <></>}
@@ -68,7 +67,9 @@ const Layout: FC<PropsWithChildren<LayoutProps>> = (props) => {
                     rel="stylesheet"
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
                 />
-                <title>tibani.link - {props.title}</title>
+                <title>
+                    {HOST} - {props.title}
+                </title>
 
                 {props.head}
             </head>

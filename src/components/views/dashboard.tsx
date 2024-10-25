@@ -2,6 +2,7 @@ import { FC, PropsWithChildren } from "hono/jsx";
 
 import { buttonClassName } from "@/components/ui";
 import { AccessLogSetting, UrlDataWithId } from "@/lib/data-manager";
+import { ORIGIN } from "@/lib";
 
 // 短縮URLのオプション
 const CheckBox: FC<PropsWithChildren<{ name: string; id: string }>> = ({
@@ -131,7 +132,7 @@ const LinkItem = ({
     id,
     accessLogSetting,
 }: { url: string; id: string; accessLogSetting: AccessLogSetting }) => {
-    const shortenedUrl = `https://tibani.link/${id}`;
+    const shortenedUrl = `${ORIGIN}/${id}`;
 
     return (
         <li id={`link-${id}`} className="p-4 border border-gray-300 rounded-lg">

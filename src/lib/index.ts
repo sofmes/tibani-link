@@ -1,5 +1,8 @@
 import { AccessLogSetting, DataManager } from "./data-manager";
 
+export const HOST = import.meta.env.VITE_HOST;
+export const ORIGIN = import.meta.env.VITE_ORIGIN;
+
 export enum AccessError {
     LoginRequiredForAccessLog,
     AccessIsLimited,

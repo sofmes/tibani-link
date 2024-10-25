@@ -8,6 +8,7 @@ import { AccessLogSetting, UrlData } from "@/lib/data-manager";
 import { type Env } from "@/index";
 import Layout from "@/components/views/layout";
 import { buttonClassName } from "@/components/ui";
+import { ORIGIN } from "@/lib";
 
 const app = new Hono<Env>();
 
@@ -69,7 +70,7 @@ app.post(
             id: z
                 .string()
                 .min(1)
-                .max(4096 - "https://tibani.link/".length),
+                .max(4096 - `${ORIGIN}/`.length),
             ...urlFormData,
         }),
     ),
@@ -90,7 +91,7 @@ app.post(
             adjustFormData(data),
         );
 
-        const shortenedUrl = `https://tibani.link/${data.id}`;
+        const shortenedUrl = `${ORIGIN}/${data.id}`;
 
         c.status(201);
         return c.render(
