@@ -69,6 +69,7 @@ const Form = () => {
                     name="id"
                     placeholder="短縮後（半角英数字）"
                     className="p-3 border border-gray-300"
+                    required
                 />
 
                 <button
