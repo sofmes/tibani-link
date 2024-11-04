@@ -101,7 +101,7 @@ const LinkItemButtons = ({
     accessLogSetting,
 }: { id: string; accessLogSetting: AccessLogSetting }) => {
     const hasNotLog = accessLogSetting == AccessLogSetting.None;
-    const justify = hasNotLog ? "justify-evenly" : "justify-evenly";
+    const justify = hasNotLog ? "sm:justify-evenly" : "sm:justify-evenly";
 
     return (
         <div class={`flex ${justify} space-x-2`}>
@@ -136,20 +136,28 @@ const LinkItem = ({
     const shortenedUrl = `${ORIGIN}/${id}`;
 
     return (
-        <li id={`link-${id}`} className="p-4 border border-gray-300 rounded-lg">
+        <li
+            id={`link-${id}`}
+            className="
+                p-4 border border-gray-300 rounded-lg
+            "
+        >
             <div
                 className="
-                    flex flex-col sm:flex-row 
+                    flex flex-col sm:flex-row w-full
                     justify-between items-start sm:items-center
-                    space-x-2 space-y-2 sm:space-y-0
+                    space-x-0 space-y-2 sm:space-x-2 sm:space-y-0
                 "
             >
-                <span className="truncate w-3/5">{url}</span>
-                <a href={shortenedUrl} className="w-1/5 text-blue-600 truncate">
+                <span className="truncate w-full sm:w-3/5">{url}</span>
+                <a
+                    href={shortenedUrl}
+                    className="sm:w-1/5 sm:truncate text-blue-600"
+                >
                     {id}
                 </a>
 
-                <div className="w-2/5">
+                <div className="sm:w-2/5">
                     <LinkItemButtons
                         id={id}
                         accessLogSetting={accessLogSetting}

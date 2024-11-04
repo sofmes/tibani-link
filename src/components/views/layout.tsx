@@ -31,7 +31,11 @@ const Header: FC<{ isLoggedIn: boolean }> = ({ isLoggedIn }) => {
 };
 
 const Main: FC = (props) => {
-    return <main className="m-auto flex-grow py-10">{props.children}</main>;
+    return (
+        <main className="m-auto flex-grow py-10 w-screen">
+            {props.children}
+        </main>
+    );
 };
 
 const Body: FC<PropsWithChildren<{ isLoggedIn: boolean }>> = (props) => {
