@@ -28,7 +28,7 @@ app.get("/google", async (c) => {
 
     const token = await loginByGoogle(code);
     if (!token) {
-        return c.redirect("/_auth");
+        return c.redirect("/_auth?isRetry=1");
     }
 
     return onAuthenticated(c, token);
@@ -42,9 +42,17 @@ app.get("/logout", (c) => {
 
 // 認証フォーム
 app.get("/", async (c) => {
+    const isRetry = c.req.query("isRetry") == "1";
+
     return c.render(
         <Layout isLoggedIn={c.get("isLoggedIn")} title="ログイン">
-            <Login />
+            <Login
+                title={
+                    isRetry
+                        ? "エラー：千葉工業大学の生徒用アカウントでログインしてください"
+                        : undefined
+                }
+            />
         </Layout>,
     );
 });
