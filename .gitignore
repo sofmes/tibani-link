@@ -8,6 +8,7 @@ dist/
 !.yarn/releases
 .vscode/*
 !.vscode/launch.json
+!.vscode/extensions.json
 !.vscode/*.code-snippets
 *.code-workspace
 *.sublime-project
