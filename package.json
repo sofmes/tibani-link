@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build && tailwindcss --output dist/static/style.css",
+        "build": "vite build && tailwindcss --input src/style.css --output dist/static/style.css",
         "deploy": "$npm_execpath run build && wrangler pages deploy"
     },
     "private": true,
