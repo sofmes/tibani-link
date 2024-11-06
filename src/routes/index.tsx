@@ -65,7 +65,6 @@ app.get("/:id", async (c) => {
         );
     }
 
-    console.log(requireRedirect, response);
     if (response) {
         if (requireRedirect) {
             setRedirectUriAfterAuth(c, c.req.url);
