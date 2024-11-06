@@ -96,25 +96,27 @@ app.post(
         c.status(201);
         return c.render(
             <Layout title="短縮URL作成完了" isLoggedIn={c.var.isLoggedIn}>
-                <h1 class="bold text-3xl">その短縮URLを作成しました！</h1>
-                <p>
-                    短縮結果：
-                    <a href={shortenedUrl} class="text-blue-600">
-                        {shortenedUrl}
-                    </a>
-                </p>
-                <p>
-                    <a
-                        href="/"
-                        class={`
+                <div class="w-fit mx-auto">
+                    <p class="bold text-3xl">その短縮URLを作成しました！</p>
+                    <p>
+                        短縮結果：
+                        <a href={shortenedUrl} class="text-blue-600">
+                            {shortenedUrl}
+                        </a>
+                    </p>
+                    <p>
+                        <a
+                            href="/"
+                            class={`
                             ${buttonClassName}
                             block bg-gray-300 !text-black
                             w-fit my-3 mx-auto
                         `}
-                    >
-                        戻る
-                    </a>
-                </p>
+                        >
+                            戻る
+                        </a>
+                    </p>
+                </div>
             </Layout>,
         );
     },
