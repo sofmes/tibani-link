@@ -108,7 +108,7 @@ app.post(
                         href="/"
                         class={`
                             ${buttonClassName}
-                            block bg-gray-300 text-black
+                            block bg-gray-300 !text-black
                             w-fit my-3 mx-auto
                         `}
                     >
