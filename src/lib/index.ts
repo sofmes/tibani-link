@@ -22,9 +22,12 @@ export async function onAccess(
     const userId = ctx.userId || undefined;
 
     // アクセスログの記録。
-    if (urlData.accessLogSetting & AccessLogSetting.AccessCount) {
-        if (!userId && urlData.accessLogSetting & AccessLogSetting.AccessUser)
-            return AccessError.LoginRequiredForAccessLog;
+    if (urlData.accessLogSetting & AccessLogSetting.AccessUser && !userId)
+        return AccessError.LoginRequiredForAccessLog;
+    if (
+        urlData.accessLogSetting &
+        (AccessLogSetting.AccessCount | AccessLogSetting.AccessUser)
+    ) {
         await ctx.data.accessLog.add(id, userId);
     }
 
