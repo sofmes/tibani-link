@@ -7,10 +7,11 @@
 
 ## 技術スタック
 - Hono
-- Cloudflare Workers
-- Cloudflare D1
 - Tailwind CSS
 - Drizzle ORM
+- htmx
+- Cloudflare Workers
+- Cloudflare D1
 
 ## セットアップ
 依存関係を以下でまずインストールする。
